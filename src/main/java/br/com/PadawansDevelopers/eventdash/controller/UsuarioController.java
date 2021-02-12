@@ -11,6 +11,7 @@ import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RestController;
 
 import br.com.PadawansDevelopers.eventdash.dao.UsuarioDAO;
+import br.com.PadawansDevelopers.eventdash.model.NovaSenhaDTO;
 import br.com.PadawansDevelopers.eventdash.model.usuario;
 
 @CrossOrigin("*")
@@ -37,6 +38,29 @@ public class UsuarioController {
 				return ResponseEntity.ok(resultado);
 			}
 			return ResponseEntity.status(401).build();
+		}
+		return ResponseEntity.notFound().build();
+	}
+	@PostMapping("/novousuario")
+	public ResponseEntity<usuario> cadastrar(@RequestBody usuario novo){
+		usuario temp = dao.findByEmailOrRacf(novo.getEmail(), novo.getRacf());
+		if(temp != null) {
+			return ResponseEntity.status(400).build();
+		}
+		dao.save(novo);
+		return ResponseEntity.status(201).body(novo);
+	 }
+	
+	@PostMapping("/trocarsenha")
+	public ResponseEntity<usuario> trocarsenha(@RequestBody NovaSenhaDTO alter){	
+		usuario resultado = dao.findByEmailOrRacf(null, alter.getRacf());
+		if(resultado != null) {
+			if(resultado.getSenha().equals(alter.getSenhaantiga())){
+				resultado.setSenha(alter.getSenhanova());
+				dao.save(resultado);
+				return ResponseEntity.status(200).body(resultado);
+			}
+		return ResponseEntity.status(403).build();
 		}
 		return ResponseEntity.notFound().build();
 	}
